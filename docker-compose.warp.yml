@@ -47,7 +47,7 @@ services:
     container_name: grok2api
     restart: unless-stopped
     ports:
-      - "${HOST_PORT:-8000}:${SERVER_PORT:-8000}"
+      - "127.0.0.1:${HOST_PORT:-8000}:${SERVER_PORT:-8000}"
     environment:
       TZ: Asia/Shanghai
       LOG_LEVEL: ${LOG_LEVEL:-INFO}

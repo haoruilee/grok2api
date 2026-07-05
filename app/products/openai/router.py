@@ -529,7 +529,8 @@ async def videos_content(video_id: str):
 async def image_edits(
     model: Annotated[str, Form(...)],
     prompt: Annotated[str, Form(...)],
-    image: Annotated[list[UploadFile], File(..., alias="image[]")],
+    image: Annotated[list[UploadFile] | None, File(alias="image[]")] = None,
+    image_standard: Annotated[list[UploadFile] | None, File(alias="image")] = None,
     mask: Annotated[UploadFile | None, File()] = None,
     n: Annotated[int, Form()] = 1,
     size: Annotated[str, Form()] = "1024x1024",
@@ -546,9 +547,13 @@ async def image_edits(
 
     from .images import edit as img_edit
 
+    image_files = [*(image or []), *(image_standard or [])]
+    if not image_files:
+        raise ValidationError("Image edit requires at least one image", param="image")
+
     image_inputs = [
         await _upload_to_data_uri(item, param=f"image.{index}")
-        for index, item in enumerate(image)
+        for index, item in enumerate(image_files)
     ]
     # Wrap input into a single-message conversation.
     content = [{"type": "text", "text": prompt}]
